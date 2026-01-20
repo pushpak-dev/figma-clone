@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="editor">
+
+   <aside class="left-panel">
+  <!-- TOP: FILE INFO -->
+  <div class="file-info">
+    <div class="file-name">Untitled</div>
+    <div class="file-meta">Drafts · Free</div>
+  </div>
+
+  <!-- PAGES -->
+  <div class="section">
+    <div class="section-header">
+      <span>Pages</span>
+      <span class="plus">+</span>
+    </div>
+
+    <div class="page active">Page 1</div>
+  </div>
+
+  <!-- LAYERS -->
+  <div class="section">
+    <div class="section-header">
+      <span>Layers</span>
+    </div>
+
+    <ul class="layers">
+      <!-- dynamic later -->
+      <!-- <li class="layer active">Rectangle 1</li> -->
+    </ul>
+  </div>
+</aside>
+
+
+    <main class="canvas-wrapper">
+      <div id="canvas"></div>
+    </main>
+
+ 
+   <aside class="right-panel">
+  <div class="mode-tabs">
+    <button class="tab active">Design</button>
+    <button class="tab">Prototype</button>
+  </div>
+
+  <div class="panel-section">
+    <div class="section-title">Page</div>
+
+   <div class="row color-row">
+  <input type="color" class="color-input" value="#1e1e1e">
+
+  <input
+    type="text"
+    class="color-code-input"
+    value="1E1E1E"
+    maxlength="6"
+  >
+
+  <input
+    type="number"
+    class="opacity-input"
+    value="100"
+    min="0"
+    max="100"
+  >
+  <span class="percent">%</span>
+</div>
+</div>
+
+ <div class="panel-section">
+  <div class="section-title">Size</div>
+
+  <input
+    type="number"
+    id="widthInput"
+    placeholder="W"
+    style="margin-bottom:6px;"
+  >
+
+  <input
+    type="number"
+    id="heightInput"
+    placeholder="H"
+  >
+</div>
+
+
+<div class="panel-section">
+  <div class="section-title">
+    Styles
+    <span class="plus">+</span>
+  </div>
+
+  <textarea
+    id="textInput"
+    placeholder="Enter text"
+    style="
+      width: 100%;
+      min-height: 60px;
+      background: #1e1e1e;
+      border: 1px solid #3a3a3a;
+      color: #e5e5e5;
+      padding: 6px;
+      font-size: 12px;
+      resize: none;
+    "
+  ></textarea>
+</div>
+
+
+
+</aside>
+
+
+   <div class="toolbar">
+  <button class="tool active" data-tool="select" title="Select">
+    ⬚
+  </button>
+
+  <button class="tool" data-tool="rect" title="Rectangle">
+    ▭
+  </button>
+
+  <button class="tool" data-tool="text" title="Text">
+    T
+  </button>
+
+  <div class="divider"></div>
+
+  <button class="tool danger" title="Delete">
+    🗑
+  </button>
+
+  <div class="divider"></div>
+
+  <button class="tool export" title="Export JSON">
+    ⬇ JSON
+  </button>
+
+  <button class="tool export" title="Export HTML">
+    ⬇ HTML
+  </button>
+</div>
+
+
+  </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
