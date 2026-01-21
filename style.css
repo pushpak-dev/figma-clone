@@ -3,6 +3,7 @@
     padding: 0;
     box-sizing: border-box;
     user-select: none;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 html,body{
     height: 100%;
@@ -134,6 +135,8 @@ body {
   background: #111;
   position: relative;
   outline: 1px solid #333;
+  background-image:radial-gradient(#2a2a2a 1px, transparent 1px);
+  background-size: 16px 16px;
 }
 
 .toolbar {
@@ -313,7 +316,8 @@ body {
 
 
 .selected {
-  outline: 2px solid #4fa3ff;
+  outline: 1px dashed #4fa3ff;
+  outline-offset: 2px;
 }
 
 
