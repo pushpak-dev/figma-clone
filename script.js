@@ -27,6 +27,14 @@ const textInput = document.getElementById("textInput");
 let isResizing = false;
 let resizeDirection = null;
 
+function loadFromLocalStorage() {
+  const data = localStorage.getItem("figmaCloneData");
+  if (data) {
+    elements = JSON.parse(data);
+    render();
+  }
+}
+
 textInput.addEventListener("input", () => {
   const el = elements.find((el) => el.id === selectedElementId);
   if (!el || el.type !== "text") return;
@@ -98,6 +106,7 @@ function render() {
 
   renderLayers();
   syncProperties();
+  saveToLocalStorage();
 }
 
 canvas.addEventListener("mousedown", (e) => {
@@ -473,3 +482,9 @@ function exportHTML() {
 }
 
 exportHtmlBtn.addEventListener("click", exportHTML);
+
+function saveToLocalStorage() {
+  localStorage.setItem("figmaCloneData", JSON.stringify(elements));
+}
+
+loadFromLocalStorage();
