@@ -89,8 +89,8 @@ function render() {
       });
 
       const rotateHandle = document.createElement("div");
-  rotateHandle.className = "rotate-handle";
-  div.appendChild(rotateHandle);
+      rotateHandle.className = "rotate-handle";
+      div.appendChild(rotateHandle);
     }
 
     canvas.appendChild(div);
@@ -101,10 +101,10 @@ function render() {
 }
 
 canvas.addEventListener("mousedown", (e) => {
-      if (e.target.classList.contains("rotate-handle")) {
+  if (e.target.classList.contains("rotate-handle")) {
     isRotating = true;
 
-    const el = elements.find(el => el.id === selectedElementId);
+    const el = elements.find((el) => el.id === selectedElementId);
     if (!el) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -118,17 +118,14 @@ canvas.addEventListener("mousedown", (e) => {
     elementStartRotation = el.rotation;
 
     e.stopPropagation();
-    return; 
+    return;
   }
-
-
-
 
   if (e.target.classList.contains("handle")) {
     isResizing = true;
     resizeDirection = e.target.dataset.dir;
     e.stopPropagation();
-    return; 
+    return;
   }
 
   if (currentTool === "rect") {
@@ -144,7 +141,7 @@ canvas.addEventListener("mousedown", (e) => {
       width: 120,
       height: 80,
       color: "#4fa3ff",
-       rotation: 0 ,
+      rotation: 0,
     };
 
     elements.push(newElement);
@@ -173,7 +170,7 @@ canvas.addEventListener("mousedown", (e) => {
       height: 30,
       color: "#ffffff",
       text: "Text",
-      rotation: 0 
+      rotation: 0,
     };
 
     elements.push(newText);
@@ -210,56 +207,64 @@ canvas.addEventListener("mousedown", (e) => {
 });
 
 document.addEventListener("mousemove", (e) => {
+  if (isRotating) {
+    const el = elements.find((el) => el.id === selectedElementId);
+    if (!el) return;
 
-    if (isRotating) {
-  const el = elements.find(el => el.id === selectedElementId);
-  if (!el) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = el.x + el.width / 2;
+    const cy = el.y + el.height / 2;
 
-  const rect = canvas.getBoundingClientRect();
-  const cx = el.x + el.width / 2;
-  const cy = el.y + el.height / 2;
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
 
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
+    const angle = Math.atan2(my - cy, mx - cx);
+    const delta = angle - rotationStartAngle;
 
-  const angle = Math.atan2(my - cy, mx - cx);
-  const delta = angle - rotationStartAngle;
+    el.rotation = elementStartRotation + (delta * 180) / Math.PI;
 
-  el.rotation = elementStartRotation + (delta * 180) / Math.PI;
-
-  render();
-  return;
-}
-
+    render();
+    return;
+  }
 
   if (isResizing) {
     const el = elements.find((el) => el.id === selectedElementId);
     if (!el) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+    const canvasRect = canvas.getBoundingClientRect();
+    const mx = e.clientX - canvasRect.left;
+    const my = e.clientY - canvasRect.top;
 
     const minSize = 20;
 
     if (resizeDirection.includes("r")) {
-      el.width = Math.max(minSize, mx - el.x);
+      el.width = Math.max(
+        minSize,
+        Math.min(mx - el.x, canvas.clientWidth - el.x),
+      );
     }
     if (resizeDirection.includes("b")) {
-      el.height = Math.max(minSize, my - el.y);
+      el.height = Math.max(
+        minSize,
+        Math.min(my - el.y, canvas.clientHeight - el.y),
+      );
     }
     if (resizeDirection.includes("l")) {
-      const newW = el.width + (el.x - mx);
-      if (newW > minSize) {
-        el.x = mx;
-        el.width = newW;
+      const newX = Math.max(0, mx);
+      const newW = el.width + (el.x - newX);
+
+      if (newW >= minSize) {
+        el.x = newX;
+        el.width = Math.min(newW, el.x + el.width);
       }
     }
     if (resizeDirection.includes("t")) {
-      const newH = el.height + (el.y - my);
-      if (newH > minSize) {
-        el.y = my;
-        el.height = newH;
+      const newY = Math.max(0, my);
+      const newH = el.height + (el.y - newY);
+
+      if (newH >= minSize) {
+        el.y = newY;
+        el.height = Math.min(newH, el.y + el.height);
       }
     }
 
