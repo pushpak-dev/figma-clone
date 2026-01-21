@@ -4,8 +4,9 @@ let isDragging = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 let selectedElementId = null;
-
 let isRotating = false;
+let isResizing = false;
+let resizeDirection = null;
 let rotationStartAngle = 0;
 let elementStartRotation = 0;
 
@@ -13,19 +14,13 @@ const canvas = document.getElementById("canvas");
 const toolButtons = document.querySelectorAll(".tool");
 const layersList = document.querySelector(".layers");
 const deleteBtn = document.querySelector(".tool.danger");
-
 const widthInput = document.getElementById("widthInput");
 const heightInput = document.getElementById("heightInput");
 const colorInput = document.querySelector(".color-input");
 const colorCodeInput = document.querySelector(".color-code-input");
-
 const exportJsonBtn = document.querySelector('[title="Export JSON"]');
 const exportHtmlBtn = document.querySelector('[title="Export HTML"]');
-
 const textInput = document.getElementById("textInput");
-
-let isResizing = false;
-let resizeDirection = null;
 
 function loadFromLocalStorage() {
   const data = localStorage.getItem("figmaCloneData");
