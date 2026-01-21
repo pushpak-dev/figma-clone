@@ -1,10 +1,14 @@
-
-let currentTool = "select"; 
+let currentTool = "select";
 let elements = [];
 let isDragging = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
-let selectedElementId = null; 
+let selectedElementId = null;
+
+let isRotating = false;
+let rotationStartAngle = 0;
+let elementStartRotation = 0;
+
 const canvas = document.getElementById("canvas");
 const toolButtons = document.querySelectorAll(".tool");
 const layersList = document.querySelector(".layers");
@@ -23,24 +27,17 @@ const textInput = document.getElementById("textInput");
 let isResizing = false;
 let resizeDirection = null;
 
-
-
-
-
 textInput.addEventListener("input", () => {
-  const el = elements.find(el => el.id === selectedElementId);
+  const el = elements.find((el) => el.id === selectedElementId);
   if (!el || el.type !== "text") return;
 
   el.text = textInput.value;
   render();
 });
 
-
-
-toolButtons.forEach(btn => {
+toolButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
-
-    toolButtons.forEach(b => b.classList.remove("active"));
+    toolButtons.forEach((b) => b.classList.remove("active"));
 
     btn.classList.add("active");
 
@@ -54,16 +51,10 @@ toolButtons.forEach(btn => {
   });
 });
 
-
-
-
-
-
-
 function render() {
   canvas.innerHTML = "";
 
-  elements.forEach(el => {
+  elements.forEach((el) => {
     const div = document.createElement("div");
     div.className = "box";
     div.dataset.id = el.id;
@@ -73,6 +64,9 @@ function render() {
     div.style.width = el.width + "px";
     div.style.height = el.height + "px";
     div.style.position = "absolute";
+
+    div.style.transform = `rotate(${el.rotation}deg)`;
+    div.style.transformOrigin = "center center";
 
     if (el.type === "rect") {
       div.style.background = el.color;
@@ -87,12 +81,16 @@ function render() {
 
     if (el.id === selectedElementId && currentTool === "select") {
       div.classList.add("selected");
-      ["tl","tr","bl","br"].forEach(pos => {
+      ["tl", "tr", "bl", "br"].forEach((pos) => {
         const h = document.createElement("div");
         h.className = "handle " + pos;
         h.dataset.dir = pos;
         div.appendChild(h);
       });
+
+      const rotateHandle = document.createElement("div");
+  rotateHandle.className = "rotate-handle";
+  div.appendChild(rotateHandle);
     }
 
     canvas.appendChild(div);
@@ -102,21 +100,36 @@ function render() {
   syncProperties();
 }
 
-
-
-
-
-
-
 canvas.addEventListener("mousedown", (e) => {
+      if (e.target.classList.contains("rotate-handle")) {
+    isRotating = true;
+
+    const el = elements.find(el => el.id === selectedElementId);
+    if (!el) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const cx = el.x + el.width / 2;
+    const cy = el.y + el.height / 2;
+
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    rotationStartAngle = Math.atan2(my - cy, mx - cx);
+    elementStartRotation = el.rotation;
+
+    e.stopPropagation();
+    return; 
+  }
+
+
+
 
   if (e.target.classList.contains("handle")) {
     isResizing = true;
     resizeDirection = e.target.dataset.dir;
     e.stopPropagation();
-    return; // ⬅️ yahan return OK hai
+    return; 
   }
-
 
   if (currentTool === "rect") {
     if (e.target !== canvas) return;
@@ -130,57 +143,50 @@ canvas.addEventListener("mousedown", (e) => {
       y: e.clientY - rect.top,
       width: 120,
       height: 80,
-      color: "#4fa3ff"
+      color: "#4fa3ff",
+       rotation: 0 ,
     };
 
     elements.push(newElement);
     selectedElementId = newElement.id;
 
+    currentTool = "select";
 
-      currentTool = "select";
-
-  // (optional but recommended)
-  toolButtons.forEach(b => b.classList.remove("active"));
-  toolButtons[0].classList.add("active");
-
+    toolButtons.forEach((b) => b.classList.remove("active"));
+    toolButtons[0].classList.add("active");
 
     render();
     return;
   }
 
+  if (currentTool === "text") {
+    if (e.target !== canvas) return;
 
+    const rect = canvas.getBoundingClientRect();
 
+    const newText = {
+      id: crypto.randomUUID(),
+      type: "text",
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      width: 100,
+      height: 30,
+      color: "#ffffff",
+      text: "Text",
+      rotation: 0 
+    };
 
+    elements.push(newText);
+    selectedElementId = newText.id;
 
-if (currentTool === "text") {
-  if (e.target !== canvas) return;
+    currentTool = "select";
+    toolButtons.forEach((b) => b.classList.remove("active"));
+    toolButtons[0].classList.add("active");
 
-  const rect = canvas.getBoundingClientRect();
+    render();
+    return;
+  }
 
-  const newText = {
-    id: crypto.randomUUID(),
-    type: "text",
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top,
-    width: 100,
-    height: 30,
-    color: "#ffffff",
-    text: "Text"
-  };
-
-  elements.push(newText);
-  selectedElementId = newText.id;
-
-  currentTool = "select";
-  toolButtons.forEach(b => b.classList.remove("active"));
-  toolButtons[0].classList.add("active");
-
-  render();
-  return;
-}
-
-
-  
   if (currentTool === "select") {
     const target = e.target;
 
@@ -193,7 +199,7 @@ if (currentTool === "text") {
     selectedElementId = target.dataset.id;
     isDragging = true;
 
-    const el = elements.find(el => el.id === selectedElementId);
+    const el = elements.find((el) => el.id === selectedElementId);
     const canvasRect = canvas.getBoundingClientRect();
 
     dragOffsetX = e.clientX - canvasRect.left - el.x;
@@ -203,18 +209,31 @@ if (currentTool === "text") {
   }
 });
 
-
-
-
-
-
-
-
 document.addEventListener("mousemove", (e) => {
 
- 
+    if (isRotating) {
+  const el = elements.find(el => el.id === selectedElementId);
+  if (!el) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const cx = el.x + el.width / 2;
+  const cy = el.y + el.height / 2;
+
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  const angle = Math.atan2(my - cy, mx - cx);
+  const delta = angle - rotationStartAngle;
+
+  el.rotation = elementStartRotation + (delta * 180) / Math.PI;
+
+  render();
+  return;
+}
+
+
   if (isResizing) {
-    const el = elements.find(el => el.id === selectedElementId);
+    const el = elements.find((el) => el.id === selectedElementId);
     if (!el) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -245,12 +264,11 @@ document.addEventListener("mousemove", (e) => {
     }
 
     render();
-    return; 
+    return;
   }
 
- 
   if (isDragging) {
-    const el = elements.find(el => el.id === selectedElementId);
+    const el = elements.find((el) => el.id === selectedElementId);
     if (!el) return;
 
     const canvasRect = canvas.getBoundingClientRect();
@@ -265,24 +283,14 @@ document.addEventListener("mousemove", (e) => {
   }
 });
 
-
 document.addEventListener("mouseup", () => {
   isDragging = false;
   dragOffsetX = 0;
   dragOffsetY = 0;
   isResizing = false;
+  isRotating = false;
   resizeDirection = null;
 });
-
-
-
-
-
-
-
-
-
-
 
 function renderLayers() {
   layersList.innerHTML = "";
@@ -307,17 +315,10 @@ function renderLayers() {
   });
 }
 
-
-
-
-
-
-
-
 function deleteSelected() {
   if (!selectedElementId) return;
 
-  elements = elements.filter(el => el.id !== selectedElementId);
+  elements = elements.filter((el) => el.id !== selectedElementId);
   selectedElementId = null;
 
   render();
@@ -330,13 +331,8 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-
-
-
-
-
 function syncProperties() {
-  const el = elements.find(el => el.id === selectedElementId);
+  const el = elements.find((el) => el.id === selectedElementId);
 
   if (!el) {
     widthInput.value = "";
@@ -359,40 +355,32 @@ function syncProperties() {
   }
 }
 
-
-
-
 widthInput.addEventListener("input", () => {
-  const el = elements.find(el => el.id === selectedElementId);
+  const el = elements.find((el) => el.id === selectedElementId);
   if (!el) return;
 
   el.width = +widthInput.value;
   render();
 });
 
-
-
 heightInput.addEventListener("input", () => {
-  const el = elements.find(el => el.id === selectedElementId);
+  const el = elements.find((el) => el.id === selectedElementId);
   if (!el) return;
 
   el.height = +heightInput.value;
   render();
 });
 
-
 colorInput.addEventListener("input", () => {
-  const el = elements.find(el => el.id === selectedElementId);
+  const el = elements.find((el) => el.id === selectedElementId);
   if (!el) return;
 
   el.color = colorInput.value;
   render();
 });
 
-
-
 colorCodeInput.addEventListener("input", () => {
-  const el = elements.find(el => el.id === selectedElementId);
+  const el = elements.find((el) => el.id === selectedElementId);
   if (!el) return;
 
   const val = colorCodeInput.value;
@@ -401,9 +389,6 @@ colorCodeInput.addEventListener("input", () => {
     render();
   }
 });
-
-
-
 
 function exportJSON() {
   const data = JSON.stringify(elements, null, 2);
@@ -420,9 +405,6 @@ function exportJSON() {
 }
 exportJsonBtn.addEventListener("click", exportJSON);
 
-
-
-
 function exportHTML() {
   let html = `
 <!DOCTYPE html>
@@ -437,8 +419,7 @@ function exportHTML() {
 <body>
 `;
 
-  elements.forEach(el => {
-
+  elements.forEach((el) => {
     if (el.type === "rect") {
       html += `
 <div style="

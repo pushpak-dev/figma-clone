@@ -13,6 +13,7 @@ body {
   background: #1e1e1e;
   color: #fff;
   font-family: sans-serif;
+  overflow: hidden;
 }
 
 .left-panel {
@@ -348,4 +349,16 @@ body {
   left: -4px;
   top: -4px;
   cursor: nwse-resize;
+}
+
+.rotate-handle {
+  width: 12px;
+  height: 12px;
+  background: #4fa3ff;
+  border-radius: 50%;
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
 }
