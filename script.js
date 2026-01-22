@@ -104,6 +104,14 @@ function render() {
   saveToLocalStorage();
 }
 
+function bringToFront(id) {
+  const index = elements.findIndex(el => el.id === id);
+  if (index === -1) return;
+  const [el] = elements.splice(index, 1);
+  elements.push(el);
+}
+
+
 canvas.addEventListener("mousedown", (e) => {
   if (e.target.classList.contains("rotate-handle")) {
     isRotating = true;
@@ -198,6 +206,7 @@ canvas.addEventListener("mousedown", (e) => {
     }
 
     selectedElementId = target.dataset.id;
+    bringToFront(selectedElementId);
     isDragging = true;
 
     const el = elements.find((el) => el.id === selectedElementId);
